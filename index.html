@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaloriya Nazorati</title>
+    <title>Kaloriya Nazorati - AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #4f46e5;
-            --bg-gradient: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+            --bg-color: #f1f5f9;
             --card-bg: #ffffff;
             --text-main: #1e293b;
             --text-muted: #64748b;
@@ -16,7 +16,7 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #e2e8f0;
+            background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 0;
@@ -56,11 +56,40 @@
             padding-bottom: 90px;
         }
 
+        /* Sozlamalar oynasi formasi uchun stil */
+        .setup-card {
+            background: white;
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+        .setup-card h3 { margin-top: 0; font-size: 15px; color: var(--primary); }
+        .setup-row { display: flex; gap: 10px; margin-bottom: 8px; }
+        .setup-row input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+        }
+        .setup-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
         .header-title {
             text-align: center;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 600;
-            color: var(--text-main);
             margin-bottom: 15px;
         }
 
@@ -77,9 +106,9 @@
 
         .cal-item {
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-muted);
-            padding: 6px 10px;
+            padding: 6px 8px;
             border-radius: 12px;
         }
 
@@ -92,27 +121,27 @@
         .ring-card {
             background: white;
             border-radius: 24px;
-            padding: 24px;
+            padding: 20px;
             text-align: center;
             box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
             margin-bottom: 20px;
-            position: relative;
         }
 
         .ring-container {
-            width: 150px;
-            height: 150px;
+            width: 140px;
+            height: 140px;
             border-radius: 50%;
-            background: conic-gradient(#4f46e5 0% 75%, #e2e8f0 75% 100%);
+            background: conic-gradient(#4f46e5 var(--progress-deg, 0deg), #e2e8f0 0deg);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 15px auto;
+            margin: 0 auto 12px auto;
+            transition: background 0.5s ease;
         }
 
         .ring-inner {
-            width: 130px;
-            height: 130px;
+            width: 120px;
+            height: 120px;
             background: white;
             border-radius: 50%;
             display: flex;
@@ -123,9 +152,8 @@
 
         .ring-inner h2 {
             margin: 0;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
-            color: var(--text-main);
         }
 
         .ring-inner p {
@@ -135,7 +163,7 @@
         }
 
         .ring-subtext {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-muted);
             margin: 0;
         }
@@ -149,7 +177,7 @@
 
         .macro-card {
             background: white;
-            padding: 15px 10px;
+            padding: 12px 8px;
             border-radius: 20px;
             text-align: center;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
@@ -157,9 +185,9 @@
 
         .macro-card b {
             display: block;
-            font-size: 15px;
+            font-size: 14px;
             color: var(--text-main);
-            margin-top: 5px;
+            margin-top: 4px;
         }
 
         .macro-card span {
@@ -168,10 +196,9 @@
         }
 
         .section-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             margin-bottom: 12px;
-            color: var(--text-main);
         }
 
         .food-list {
@@ -182,7 +209,7 @@
 
         .food-item {
             background: white;
-            padding: 12px 15px;
+            padding: 10px 12px;
             border-radius: 16px;
             display: flex;
             align-items: center;
@@ -191,22 +218,22 @@
         }
 
         .food-item img {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
             object-fit: cover;
             background: #e2e8f0;
         }
 
         .food-info h4 {
-            margin: 0 0 4px 0;
-            font-size: 14px;
+            margin: 0 0 2px 0;
+            font-size: 13px;
             font-weight: 600;
         }
 
         .food-info p {
             margin: 0;
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-muted);
         }
 
@@ -233,30 +260,27 @@
             border: none;
             font-size: 20px;
             cursor: pointer;
-            color: var(--text-muted);
         }
 
-        /* Kamera ochuvchi markaziy tugma */
         .camera-btn-wrapper {
             position: relative;
             top: -20px;
         }
 
         .camera-fab {
-            width: 60px;
-            height: 60px;
+            width: 55px;
+            height: 55px;
             background: var(--text-main);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 28px;
+            font-size: 26px;
             box-shadow: 0 8px 16px rgba(0,0,0,0.2);
             cursor: pointer;
         }
 
-        /* Yashirin kamera inputi */
         #camera-input {
             display: none;
         }
@@ -268,7 +292,19 @@
     <div class="content-area">
         <div class="header-title">Kaloriya Nazorati</div>
 
-        <!-- Taqvim -->
+        <div class="setup-card">
+            <h3>⚙️ Parametrlaringiz</h3>
+            <div class="setup-row">
+                <input type="number" id="age" value="14" placeholder="Yosh">
+                <input type="number" step="0.01" id="height" value="1.55" placeholder="Bo'y">
+            </div>
+            <div class="setup-row">
+                <input type="number" id="weight" value="53" placeholder="Vazn">
+                <input type="number" id="target" value="46" placeholder="Maqsad">
+            </div>
+            <button class="setup-btn" onclick="saveSettings()">Normani Hisoblash</button>
+        </div>
+
         <div class="calendar-row">
             <div class="cal-item"><span>Pay</span><br><b>02</b></div>
             <div class="cal-item"><span>Jum</span><br><b>03</b></div>
@@ -278,66 +314,40 @@
             <div class="cal-item"><span>Sesh</span><br><b>07</b></div>
         </div>
 
-        <!-- Kaloriya doirasi -->
         <div class="ring-card">
-            <div class="ring-container">
+            <div class="ring-container" id="ring-container">
                 <div class="ring-inner">
-                    <h2 id="remaining-kcal">1,850</h2>
-                    <p>/ 2,154 kkal</p>
+                    <h2 id="consumed-display">0</h2>
+                    <p>/ <span id="limit-display">1610</span> kkal</p>
                 </div>
             </div>
-            <p class="ring-subtext">Yaxshi yo'ldasiz! Qolgan <span id="diff-kcal">304</span> kkal</p>
+            <p class="ring-subtext" id="status-text">Bugungi ovqatlaringizni qo'shing</p>
         </div>
 
-        <!-- Makrolar -->
         <div class="macros-grid">
             <div class="macro-card">
                 <span>🥩 Oqsil</span>
-                <b id="protein-val">168g</b>
+                <b id="protein-val">0g</b>
             </div>
             <div class="macro-card">
                 <span>🌾 Uglevod</span>
-                <b id="carb-val">220g</b>
+                <b id="carb-val">0g</b>
             </div>
             <div class="macro-card">
                 <span>🥑 Yog'lar</span>
-                <b id="fat-val">65g</b>
+                <b id="fat-val">0g</b>
             </div>
         </div>
 
-        <!-- Yeguliklar tarixi -->
         <div class="section-title">Bugungi yeguliklar</div>
         <div class="food-list" id="food-list-container">
-            <div class="food-item">
-                <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=100" alt="Non">
-                <div class="food-info">
-                    <h4>Non, bug'doy</h4>
-                    <p>150 kkal • 6g protein • 2g yog'</p>
-                </div>
             </div>
-            <div class="food-item">
-                <img src="https://images.unsplash.com/photo-1607305387299-a3d9611cd469?w=100" alt="Go'sht">
-                <div class="food-info">
-                    <h4>Tovuq go'shti, 100g</h4>
-                    <p>150 kkal • 6g protein • 2g yog'</p>
-                </div>
-            </div>
-            <div class="food-item">
-                <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?w=100" alt="Salat">
-                <div class="food-info">
-                    <h4>Taze sabzavotlar salati</h4>
-                    <p>65 kkal • 2g protein • 4g yog'</p>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Pastki menyu va to'g'ridan-to'g'ri kamera tugmasi -->
     <div class="bottom-nav">
         <button class="nav-btn">🏠</button>
         
         <div class="camera-btn-wrapper">
-            <!-- capture="environment" atributi fayl tanlash oynasini chetlab o'tib, to'g'ridan-to'g'ri orqa kamerani ochadi -->
             <label for="camera-input" class="camera-fab">+</label>
             <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handleCameraCapture(event)">
         </div>
@@ -347,29 +357,124 @@
 </div>
 
 <script>
+    // Sahifa ochilganda ma'lumotlarni yuklash va 00:00 da tozalashni tekshirish
+    window.onload = function() {
+        checkMidnightReset();
+        loadData();
+    };
+
+    function saveSettings() {
+        let weight = parseFloat(document.getElementById('weight').value);
+        let height = parseFloat(document.getElementById('height').value) * 100;
+        let age = parseFloat(document.getElementById('age').value);
+
+        let bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+        let limit = Math.round(bmr * 1.2 - 350); // Ozish uchun kaloriya
+
+        localStorage.setItem('calLimit', limit);
+        localStorage.setItem('weight', weight);
+        localStorage.setItem('height', height);
+        localStorage.setItem('age', age);
+        
+        loadData();
+        alert("Parametrlar saqlandi va kunlik norma yangilandi, dadajon!");
+    }
+
     function handleCameraCapture(event) {
         const file = event.target.files[0];
         if (file) {
-            // Rasmning vaqtinchalik havolasini olamiz
             const imageUrl = URL.createObjectURL(file);
             
-            // Yangi element yaratib ro'yxatga qo'shamiz (AI tahlili simulyatsiyasi)
-            const listContainer = document.getElementById('food-list-container');
-            
-            const newItem = document.createElement('div');
-            newItem.className = 'food-item';
-            newItem.innerHTML = `
-                <img src="${imageUrl}" alt="Ovqat">
-                <div class="food-info">
-                    <h4>Yangi tahlil qilingan taom</h4>
-                    <p>250 kkal • 12g protein • 5g yog'</p>
-                </div>
-            `;
-            
-            // Ro'yxat boshiga qo'shish
-            listContainer.prepend(newItem);
-            
-            alert("Rasm muvaffaqiyatli kameraga olindi va AI orqali qo'shildi, dadajon!");
+            // Tasodifiy haqiqiyroq taom qiymatlarini simulyatsiya qilamiz
+            const foods = [
+                { name: "Tovuq go'shti va salat", kcal: 280, protein: 25, carb: 10, fat: 8 },
+                { name: "Grechka va kotlet", kcal: 350, protein: 18, carb: 40, fat: 12 },
+                { name: "Tvorog va mevalar", kcal: 210, protein: 22, carb: 15, fat: 4 }
+            ];
+            const randomFood = foods[Math.floor(Math.random() * foods.length)];
+
+            // Ma'lumotlarni xotiraga qo'shish
+            let history = JSON.parse(localStorage.getItem('foodHistory')) || [];
+            let newEntry = {
+                img: imageUrl,
+                name: randomFood.name,
+                kcal: randomFood.kcal,
+                protein: randomFood.protein,
+                carb: randomFood.carb,
+                fat: randomFood.fat
+            };
+            history.unshift(newEntry);
+            localStorage.setItem('foodHistory', JSON.stringify(history));
+
+            // Jami iste'mol qilingan kaloriyani qo'shish
+            let consumed = parseInt(localStorage.getItem('consumedKcal')) || 0;
+            consumed += randomFood.kcal;
+            localStorage.setItem('consumedKcal', consumed);
+
+            loadData();
+        }
+    }
+
+    function loadData() {
+        let limit = parseInt(localStorage.getItem('calLimit')) || 1610;
+        let consumed = parseInt(localStorage.getItem('consumedKcal')) || 0;
+        let history = JSON.parse(localStorage.getItem('foodHistory')) || [];
+
+        document.getElementById('limit-display').innerText = limit;
+        document.getElementById('consumed-display').innerText = consumed;
+
+        // Doirani foiz bo'yicha to'ldirish
+        let percentage = (consumed / limit) * 360;
+        if(percentage > 360) percentage = 360;
+        document.getElementById('ring-container').style.setProperty('--progress-deg', percentage + 'deg');
+
+        // Makrolarni hisoblash
+        let totalProtein = history.reduce((sum, item) => sum + item.protein, 0);
+        let totalCarb = history.reduce((sum, item) => sum + item.carb, 0);
+        let totalFat = history.reduce((sum, item) => sum + item.fat, 0);
+
+        document.getElementById('protein-val').innerText = totalProtein + 'g';
+        document.getElementById('carb-val').innerText = totalCarb + 'g';
+        document.getElementById('fat-val').innerText = totalFat + 'g';
+
+        // Qolgan kaloriya xabari
+        let diff = limit - consumed;
+        if(diff >= 0) {
+            document.getElementById('status-text').innerText = `Yaxshi yo'ldasiz! Qolgan ${diff} kkal`;
+        } else {
+            document.getElementById('status-text').innerText = `Bugungi limitdan ${Math.abs(diff)} kkal oshib ketdingiz!`;
+        }
+
+        // Ro'yxatni chiqarish
+        let listContainer = document.getElementById('food-list-container');
+        if(history.length === 0) {
+            listContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:12px;">Hozircha ovqatlar qo'shilmadi. Kameradan rasmga oling!</p>`;
+        } else {
+            let html = '';
+            history.forEach(item => {
+                html += `
+                    <div class="food-item">
+                        <img src="${item.img}" alt="Ovqat">
+                        <div class="food-info">
+                            <h4>${item.name}</h4>
+                            <p>${item.kcal} kkal • ${item.protein}g protein • ${item.fat}g yog'</p>
+                        </div>
+                    </div>
+                `;
+            });
+            listContainer.innerHTML = html;
+        }
+    }
+
+    // 00:00 dan keyin ma'lumotlarni avtomatik nollash (restart)
+    function checkMidnightReset() {
+        let lastDate = localStorage.getItem('lastDate');
+        let currentDate = new Date().toLocaleDateString();
+
+        if (lastDate !== currentDate) {
+            localStorage.setItem('consumedKcal', 0);
+            localStorage.setItem('foodHistory', JSON.stringify([]));
+            localStorage.setItem('lastDate', currentDate);
         }
     }
 </script>
