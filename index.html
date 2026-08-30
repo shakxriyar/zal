@@ -3,117 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaloriya va Ovqat Nazorati</title>
+    <title>FitTracker - Aqlli Kaloriya Nazorati</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --bg-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            color: #333;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+            color: var(--text-main);
             margin: 0;
             padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
-        .container {
-            max-width: 500px;
-            margin: auto;
-            background: #fff;
+
+        .phone-container {
+            width: 100%;
+            max-width: 440px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            border: 1px solid #f1f5f9;
+        }
+
+        .app-header {
+            background: var(--bg-gradient);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+        }
+
+        .app-header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .app-header p {
+            margin: 5px 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .app-body {
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        h2 { text-align: center; color: #2c3e50; }
+
+        .card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 16px;
+            color: var(--text-main);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
+
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
         input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
             box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s;
         }
-        button {
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .btn {
             width: 100%;
-            padding: 10px;
-            background-color: #27ae60;
+            padding: 12px;
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
             cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-ai {
+            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+            margin-top: 8px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            text-align: center;
             margin-top: 10px;
         }
-        button:hover { background-color: #219653; }
-        .result-box, .tracker-box {
-            margin-top: 20px;
-            padding: 15px;
-            background: #eef2f3;
-            border-radius: 6px;
+
+        .stat-item {
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
         }
+
+        .stat-item span {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .stat-item b {
+            font-size: 14px;
+            color: var(--primary);
+        }
+
+        .progress-circle {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .progress-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
         .history-list {
             list-style: none;
             padding: 0;
+            margin: 0;
+            max-height: 150px;
+            overflow-y: auto;
         }
-        .history-list li {
-            background: #fff;
-            padding: 8px;
-            margin-bottom: 5px;
-            border-radius: 4px;
-            border-left: 4px solid #27ae60;
+
+        .history-item {
+            background: white;
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+            font-size: 13px;
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-fake-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: #f1f5f9;
+            border: 1px dashed #cbd5e1;
+            text-align: center;
+            border-radius: 10px;
+            color: var(--text-muted);
+            font-size: 13px;
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Fitnes va Kaloriya Nazorati</h2>
-    
-    <!-- Parametrlar formasi -->
-    <div id="setup-section" class="form-group">
-        <label>Yoshingiz:</label>
-        <input type="number" id="age" value="14">
-        
-        <label>Bo'yingiz (metrda, masalan: 1.55):</label>
-        <input type="number" step="0.01" id="height" value="1.55">
-        
-        <label>Joriy vazningiz (kg):</label>
-        <input type="number" id="weight" value="53">
-        
-        <label>Maqsadli vazningiz (kg):</label>
-        <input type="number" id="target-weight" value="46">
-        
-        <button onclick="calculatePlan()">Hisoblash va Saqlash</button>
+<div class="phone-container">
+    <div class="app-header">
+        <h2>✨ FitTracker AI</h2>
+        <p>Sog'lom turmush tarzi va ozish nazorati</p>
     </div>
 
-    <!-- Natijalar bloki -->
-    <div id="result-section" class="result-box" style="display:none;">
-        <h3>Sizning kunlik normangiz:</h3>
-        <p><b>Kaloriya:</b> <span id="res-kcal">0</span> kkal</p>
-        <p><b>Oqsil:</b> <span id="res-protein">0</span> g</p>
-        <p><b>Yog':</b> <span id="res-fat">0</span> g</p>
-        <p><b>Maqsadga erishish vaqti:</b> Taxminan <span id="res-time">0</span> hafta</p>
-    </div>
-
-    <!-- Kunlik iste'mol va rasm yuklash simulyatsiyasi -->
-    <div class="tracker-box">
-        <h3>Bugungi ovqatlanish</h3>
-        <p>Qolgan kaloriya: <span id="remaining-kcal" style="color: #c0392b; font-weight: bold;">0</span> kkal</p>
+    <div class="app-body">
         
-        <div class="form-group">
-            <label>Ovqat rasmini yuklash (Simulyatsiya):</label>
-            <input type="file" id="food-image" accept="image/*">
-            <button onclick="simulateAIFoodCheck()" style="background-color: #2980b9;">Rasm tahlil qilish (AI)</button>
+        <div class="card">
+            <h3>⚙️ Tana parametrlari</h3>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Yoshingiz</label>
+                    <input type="number" id="age" value="14">
+                </div>
+                <div class="form-group">
+                    <label>Bo'y (m)</label>
+                    <input type="number" step="0.01" id="height" value="1.55">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Joriy vazn (kg)</label>
+                    <input type="number" id="weight" value="53">
+                </div>
+                <div class="form-group">
+                    <label>Maqsad (kg)</label>
+                    <input type="number" id="target-weight" value="46">
+                </div>
+            </div>
+            <button class="btn" onclick="calculatePlan()">Hisoblash va Saqlash</button>
         </div>
 
-        <h4>Yeb bitirilgan ovqatlar tarixi:</h4>
-        <ul id="history-list" class="history-list">
-            <!-- Tarix elementlari shu yerga qo'shiladi -->
-        </ul>
+        <div class="card" id="result-section" style="display:none;">
+            <h3>📊 Kunlik rejangiz</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span>Kaloriya</span>
+                    <b id="res-kcal">0</b>
+                </div>
+                <div class="stat-item">
+                    <span>Oqsil</span>
+                    <b id="res-protein">0g</b>
+                </div>
+                <div class="stat-item">
+                    <span>Yog'</span>
+                    <b id="res-fat">0g</b>
+                </div>
+            </div>
+            <p style="text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 10px;">
+                Maqsadga erishish vaqti: <b><span id="res-time">0</span> hafta</b>
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>🍏 Kunlik hisob</h3>
+            <div class="progress-circle">
+                <span>Qolgan kaloriya</span>
+                <div class="progress-number"><span id="remaining-kcal">0</span> <span style="font-size: 14px; font-weight: normal; color: var(--text-muted);">kkal</span></div>
+            </div>
+
+            <div class="form-group" style="margin-top: 12px;">
+                <div class="file-upload-wrapper">
+                    <div class="file-fake-btn" id="file-label">📷 Ovqat rasmini tanlang</div>
+                    <input type="file" id="food-image" accept="image/*" onchange="updateFileName()">
+                </div>
+                <button class="btn btn-ai" onclick="simulateAIFoodCheck()">Rasm tahlil qilish (AI)</button>
+            </div>
+
+            <h4 style="font-size: 13px; margin: 15px 0 8px; color: var(--text-muted);">Bugungi yeyilganlar:</h4>
+            <ul id="history-list" class="history-list">
+                </ul>
+        </div>
+
     </div>
 </div>
 
 <script>
-    // Sahifa yuklanganda saqlangan ma'lumotlarni tekshirish va 00:00 tekshiruvi
     window.onload = function() {
         checkMidnightReset();
         loadData();
@@ -121,33 +316,37 @@
 
     function calculatePlan() {
         let age = parseFloat(document.getElementById('age').value);
-        let height = parseFloat(document.getElementById('height').value) * 100; // sm da
+        let height = parseFloat(document.getElementById('height').value) * 100;
         let weight = parseFloat(document.getElementById('weight').value);
         let targetWeight = parseFloat(document.getElementById('target-weight').value);
 
-        // Harris-Benedict formulasi asosida bazal metabolizm (BMR)
-        let bmr = 10 * weight + 6.25 * height - 5 * age + 5; // Erkaklar uchun
-        let dailyCalories = Math.round(bmr * 1.2 - 400); // Ozish uchun tanqislik bilan
+        let bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+        let dailyCalories = Math.round(bmr * 1.2 - 400);
 
-        // Oqsil va yog' miqdori (vaznga qarab taxminiy grammlar)
         let protein = Math.round(weight * 1.5);
         let fat = Math.round(weight * 0.8);
 
-        // Vaqtni hisoblash (Haftasiga o'rtacha 0.5 kg yo'qotish deb olinsa)
         let weightDiff = weight - targetWeight;
         let weeks = weightDiff > 0 ? Math.round(weightDiff / 0.5) : 0;
 
         document.getElementById('res-kcal').innerText = dailyCalories;
-        document.getElementById('res-protein').innerText = protein;
-        document.getElementById('res-fat').innerText = fat;
+        document.getElementById('res-protein').innerText = protein + 'g';
+        document.getElementById('res-fat').innerText = fat + 'g';
         document.getElementById('res-time').innerText = weeks;
         
         document.getElementById('result-section').style.display = 'block';
 
-        // localStorage ga saqlash
         localStorage.setItem('dailyKcalLimit', dailyCalories);
         localStorage.setItem('lastDate', new Date().toLocaleDateString());
         updateRemainingDisplay();
+    }
+
+    function updateFileName() {
+        let fileInput = document.getElementById('food-image');
+        let label = document.getElementById('file-label');
+        if(fileInput.files.length > 0) {
+            label.innerText = "✅ " + fileInput.files[0].name;
+        }
     }
 
     function simulateAIFoodCheck() {
@@ -157,11 +356,8 @@
             return;
         }
 
-        // Bu yerda AI orqali rasm tahlil qilinib kaloriya olinadi (hozircha namunaviy qiymat beramiz)
-        let recognizedFood = "Tovuq go'shti va sabzavotlar";
-        let foodKcal = 350;
-        let foodProtein = 30;
-        let foodFat = 10;
+        let recognizedFood = "Tovuq go'shti va salat";
+        let foodKcal = 320;
 
         let historyItem = {
             name: recognizedFood,
@@ -173,13 +369,16 @@
         history.push(historyItem);
         localStorage.setItem('foodHistory', JSON.stringify(history));
 
-        // Jami yeyilgan kaloriyani yangilash
         let consumed = parseInt(localStorage.getItem('consumedKcal')) || 0;
         consumed += foodKcal;
         localStorage.setItem('consumedKcal', consumed);
 
         loadData();
-        alert(`Rasm tahlil qilindi: ${recognizedFood} (${foodKcal} kkal) qo'shildi!`);
+        alert(`AI tahlili: ${recognizedFood} (${foodKcal} kkal) qo'shildi!`);
+        
+        // Reset file input
+        fileInput.value = '';
+        document.getElementById('file-label').innerText = "📷 Ovqat rasmini tanlang";
     }
 
     function loadData() {
@@ -192,10 +391,18 @@
 
         let history = JSON.parse(localStorage.getItem('foodHistory')) || [];
         let listHTML = '';
-        history.forEach(item => {
-            listHTML += `<li><b>${item.name}</b> - ${item.kcal} kkal (${item.time})</li>`;
-        });
+        if(history.length === 0) {
+            listHTML = '<li class="history-item" style="justify-content: center; color: var(--text-muted);">Hozircha ovqatlar qo\'shilmagan</li>';
+        } else {
+            history.forEach(item => {
+                listHTML += `<li class="history-item"><span><b>${item.name}</b> <br><small style="color:var(--text-muted);">${item.time}</small></span><span style="color:var(--primary); font-weight:600;">+${item.kcal} kkal</span></li>`;
+            });
+        }
         document.getElementById('history-list').innerHTML = listHTML;
+    }
+
+    function updateRemainingDisplay() {
+        loadData();
     }
 
     function checkMidnightReset() {
@@ -203,7 +410,6 @@
         let currentDate = new Date().toLocaleDateString();
 
         if (lastDate !== currentDate) {
-            // Kun o'zgargan bo'lsa, tarixni tozalash va restart berish
             localStorage.setItem('consumedKcal', 0);
             localStorage.setItem('foodHistory', JSON.stringify([]));
             localStorage.setItem('lastDate', currentDate);
