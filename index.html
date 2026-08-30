@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaloriya va Ovqat Nazorati</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2 { text-align: center; color: #2c3e50; }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #219653; }
+        .result-box, .tracker-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eef2f3;
+            border-radius: 6px;
+        }
+        .history-list {
+            list-style: none;
+            padding: 0;
+        }
+        .history-list li {
+            background: #fff;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            border-left: 4px solid #27ae60;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Fitnes va Kaloriya Nazorati</h2>
+    
+    <!-- Parametrlar formasi -->
+    <div id="setup-section" class="form-group">
+        <label>Yoshingiz:</label>
+        <input type="number" id="age" value="14">
+        
+        <label>Bo'yingiz (metrda, masalan: 1.55):</label>
+        <input type="number" step="0.01" id="height" value="1.55">
+        
+        <label>Joriy vazningiz (kg):</label>
+        <input type="number" id="weight" value="53">
+        
+        <label>Maqsadli vazningiz (kg):</label>
+        <input type="number" id="target-weight" value="46">
+        
+        <button onclick="calculatePlan()">Hisoblash va Saqlash</button>
+    </div>
+
+    <!-- Natijalar bloki -->
+    <div id="result-section" class="result-box" style="display:none;">
+        <h3>Sizning kunlik normangiz:</h3>
+        <p><b>Kaloriya:</b> <span id="res-kcal">0</span> kkal</p>
+        <p><b>Oqsil:</b> <span id="res-protein">0</span> g</p>
+        <p><b>Yog':</b> <span id="res-fat">0</span> g</p>
+        <p><b>Maqsadga erishish vaqti:</b> Taxminan <span id="res-time">0</span> hafta</p>
+    </div>
+
+    <!-- Kunlik iste'mol va rasm yuklash simulyatsiyasi -->
+    <div class="tracker-box">
+        <h3>Bugungi ovqatlanish</h3>
+        <p>Qolgan kaloriya: <span id="remaining-kcal" style="color: #c0392b; font-weight: bold;">0</span> kkal</p>
+        
+        <div class="form-group">
+            <label>Ovqat rasmini yuklash (Simulyatsiya):</label>
+            <input type="file" id="food-image" accept="image/*">
+            <button onclick="simulateAIFoodCheck()" style="background-color: #2980b9;">Rasm tahlil qilish (AI)</button>
+        </div>
+
+        <h4>Yeb bitirilgan ovqatlar tarixi:</h4>
+        <ul id="history-list" class="history-list">
+            <!-- Tarix elementlari shu yerga qo'shiladi -->
+        </ul>
+    </div>
+</div>
+
+<script>
+    // Sahifa yuklanganda saqlangan ma'lumotlarni tekshirish va 00:00 tekshiruvi
+    window.onload = function() {
+        checkMidnightReset();
+        loadData();
+    };
+
+    function calculatePlan() {
+        let age = parseFloat(document.getElementById('age').value);
+        let height = parseFloat(document.getElementById('height').value) * 100; // sm da
+        let weight = parseFloat(document.getElementById('weight').value);
+        let targetWeight = parseFloat(document.getElementById('target-weight').value);
+
+        // Harris-Benedict formulasi asosida bazal metabolizm (BMR)
+        let bmr = 10 * weight + 6.25 * height - 5 * age + 5; // Erkaklar uchun
+        let dailyCalories = Math.round(bmr * 1.2 - 400); // Ozish uchun tanqislik bilan
+
+        // Oqsil va yog' miqdori (vaznga qarab taxminiy grammlar)
+        let protein = Math.round(weight * 1.5);
+        let fat = Math.round(weight * 0.8);
+
+        // Vaqtni hisoblash (Haftasiga o'rtacha 0.5 kg yo'qotish deb olinsa)
+        let weightDiff = weight - targetWeight;
+        let weeks = weightDiff > 0 ? Math.round(weightDiff / 0.5) : 0;
+
+        document.getElementById('res-kcal').innerText = dailyCalories;
+        document.getElementById('res-protein').innerText = protein;
+        document.getElementById('res-fat').innerText = fat;
+        document.getElementById('res-time').innerText = weeks;
+        
+        document.getElementById('result-section').style.display = 'block';
+
+        // localStorage ga saqlash
+        localStorage.setItem('dailyKcalLimit', dailyCalories);
+        localStorage.setItem('lastDate', new Date().toLocaleDateString());
+        updateRemainingDisplay();
+    }
+
+    function simulateAIFoodCheck() {
+        let fileInput = document.getElementById('food-image');
+        if(fileInput.files.length === 0) {
+            alert("Iltimos, avval ovqat rasmini tanlang, dadajon!");
+            return;
+        }
+
+        // Bu yerda AI orqali rasm tahlil qilinib kaloriya olinadi (hozircha namunaviy qiymat beramiz)
+        let recognizedFood = "Tovuq go'shti va sabzavotlar";
+        let foodKcal = 350;
+        let foodProtein = 30;
+        let foodFat = 10;
+
+        let historyItem = {
+            name: recognizedFood,
+            kcal: foodKcal,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+
+        let history = JSON.parse(localStorage.getItem('foodHistory')) || [];
+        history.push(historyItem);
+        localStorage.setItem('foodHistory', JSON.stringify(history));
+
+        // Jami yeyilgan kaloriyani yangilash
+        let consumed = parseInt(localStorage.getItem('consumedKcal')) || 0;
+        consumed += foodKcal;
+        localStorage.setItem('consumedKcal', consumed);
+
+        loadData();
+        alert(`Rasm tahlil qilindi: ${recognizedFood} (${foodKcal} kkal) qo'shildi!`);
+    }
+
+    function loadData() {
+        let limit = parseInt(localStorage.getItem('dailyKcalLimit')) || 1610;
+        let consumed = parseInt(localStorage.getItem('consumedKcal')) || 0;
+        let remaining = limit - consumed;
+        if(remaining < 0) remaining = 0;
+
+        document.getElementById('remaining-kcal').innerText = remaining;
+
+        let history = JSON.parse(localStorage.getItem('foodHistory')) || [];
+        let listHTML = '';
+        history.forEach(item => {
+            listHTML += `<li><b>${item.name}</b> - ${item.kcal} kkal (${item.time})</li>`;
+        });
+        document.getElementById('history-list').innerHTML = listHTML;
+    }
+
+    function checkMidnightReset() {
+        let lastDate = localStorage.getItem('lastDate');
+        let currentDate = new Date().toLocaleDateString();
+
+        if (lastDate !== currentDate) {
+            // Kun o'zgargan bo'lsa, tarixni tozalash va restart berish
+            localStorage.setItem('consumedKcal', 0);
+            localStorage.setItem('foodHistory', JSON.stringify([]));
+            localStorage.setItem('lastDate', currentDate);
+        }
+    }
+</script>
+
+</body>
+</html>
+
