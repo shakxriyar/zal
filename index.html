@@ -3,15 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaloriya Nazorati - AI</title>
+    <title>FitUz AI - Kaloriya Nazorati</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #4f46e5;
-            --bg-color: #f1f5f9;
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
+            --primary: #22C55E;
+            --primary-dark: #16A34A;
+            --bg-color: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0F172A;
+            --card-bg: #1E293B;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border-color: #334155;
         }
 
         body {
@@ -26,12 +37,12 @@
             min-height: 100vh;
         }
 
-        .phone-mockup {
+        .app-container {
             width: 100%;
-            max-width: 410px;
-            background: #f8fafc;
+            max-width: 440px;
+            background: var(--card-bg);
             min-height: 100vh;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -39,445 +50,572 @@
             box-sizing: border-box;
         }
 
-        @media (min-width: 450px) {
-            .phone-mockup {
-                height: 850px;
-                min-height: auto;
-                border-radius: 40px;
+        @media (min-width: 460px) {
+            .app-container {
+                height: 900px;
+                border-radius: 36px;
                 overflow: hidden;
-                border: 10px solid #1e293b;
+                border: 8px solid #334155;
             }
         }
 
-        .content-area {
+        .content-scroll {
             padding: 20px;
             overflow-y: auto;
             flex: 1;
             padding-bottom: 90px;
         }
 
-        /* Sozlamalar oynasi formasi uchun stil */
-        .setup-card {
-            background: white;
-            padding: 15px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-        }
-        .setup-card h3 { margin-top: 0; font-size: 15px; color: var(--primary); }
-        .setup-row { display: flex; gap: 10px; margin-bottom: 8px; }
-        .setup-row input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 13px;
-        }
-        .setup-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 10px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 5px;
-        }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
 
-        .header-title {
-            text-align: center;
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .calendar-row {
+        .header {
             display: flex;
             justify-content: space-between;
-            background: #ffffff;
-            padding: 10px 15px;
-            border-radius: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
-            margin-bottom: 20px;
             align-items: center;
-        }
-
-        .cal-item {
-            text-align: center;
-            font-size: 11px;
-            color: var(--text-muted);
-            padding: 6px 8px;
-            border-radius: 12px;
-        }
-
-        .cal-item.active {
-            background: var(--primary);
-            color: white;
-            font-weight: 600;
-        }
-
-        .ring-card {
-            background: white;
-            border-radius: 24px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
             margin-bottom: 20px;
         }
 
-        .ring-container {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            background: conic-gradient(#4f46e5 var(--progress-deg, 0deg), #e2e8f0 0deg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 12px auto;
-            transition: background 0.5s ease;
-        }
-
-        .ring-inner {
-            width: 120px;
-            height: 120px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .ring-inner h2 {
+        .header h1 {
+            font-size: 22px;
             margin: 0;
-            font-size: 18px;
             font-weight: 700;
         }
 
-        .ring-inner p {
-            margin: 2px 0 0;
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        .ring-subtext {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin: 0;
-        }
-
-        .macros-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .macro-card {
-            background: white;
-            padding: 12px 8px;
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 20px;
-            text-align: center;
+            padding: 20px;
+            margin-bottom: 16px;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
         }
 
-        .macro-card b {
-            display: block;
-            font-size: 14px;
-            color: var(--text-main);
-            margin-top: 4px;
-        }
-
-        .macro-card span {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        .section-title {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .food-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .food-item {
-            background: white;
-            padding: 10px 12px;
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
             border-radius: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .food-item img {
-            width: 45px;
-            height: 45px;
-            border-radius: 10px;
-            object-fit: cover;
-            background: #e2e8f0;
-        }
-
-        .food-info h4 {
-            margin: 0 0 2px 0;
-            font-size: 13px;
+            font-size: 16px;
             font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            text-align: center;
+            display: inline-block;
+            box-sizing: border-box;
         }
 
-        .food-info p {
-            margin: 0;
-            font-size: 11px;
-            color: var(--text-muted);
+        .btn:hover { background: var(--primary-dark); }
+        .btn:active { transform: scale(0.98); }
+
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-main);
+            border-radius: 14px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            outline: none;
         }
 
-        /* Pastki navigatsiya va Kamera tugmasi */
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+        }
+
         .bottom-nav {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            background: white;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
             height: 75px;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
-            border-top-left-radius: 24px;
-            border-top-right-radius: 24px;
+            z-index: 100;
             box-sizing: border-box;
-            z-index: 10;
         }
 
-        .nav-btn {
+        .nav-item {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
             background: none;
             border: none;
-            font-size: 20px;
             cursor: pointer;
         }
 
-        .camera-btn-wrapper {
-            position: relative;
-            top: -20px;
-        }
+        .nav-item.active { color: var(--primary); font-weight: 600; }
+        .nav-item span { font-size: 20px; }
 
-        .camera-fab {
-            width: 55px;
-            height: 55px;
-            background: var(--text-main);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #1E293B;
             color: white;
-            font-size: 26px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-            cursor: pointer;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+            z-index: 1000;
         }
-
-        #camera-input {
-            display: none;
-        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
 
-<div class="phone-mockup">
-    <div class="content-area">
-        <div class="header-title">Kaloriya Nazorati</div>
+<div class="app-container">
+    <div class="content-scroll">
 
-        <div class="setup-card">
-            <h3>⚙️ Parametrlaringiz</h3>
-            <div class="setup-row">
-                <input type="number" id="age" value="14" placeholder="Yosh">
-                <input type="number" step="0.01" id="height" value="1.55" placeholder="Bo'y">
-            </div>
-            <div class="setup-row">
-                <input type="number" id="weight" value="53" placeholder="Vazn">
-                <input type="number" id="target" value="46" placeholder="Maqsad">
-            </div>
-            <button class="setup-btn" onclick="saveSettings()">Normani Hisoblash</button>
+        <div id="view-onboarding" class="view-section">
+            <h2 style="text-align: center; color: var(--primary); margin-bottom: 10px;">FitUz AI ga xush kelibsiz</h2>
+            <p style="text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Maqsadingizga erishish uchun parametrlaringizni kiriting.</p>
+            
+            <form id="onboarding-form">
+                <label>Ismingiz</label>
+                <input type="text" id="onb-name" required placeholder="Masalan: Jasur">
+
+                <label>Yoshingiz</label>
+                <input type="number" id="onb-age" required value="20">
+
+                <label>Jinsingiz</label>
+                <select id="onb-gender">
+                    <option value="Erkak">Erkak</option>
+                    <option value="Ayol">Ayol</option>
+                </select>
+
+                <label>Bo'yingiz (cm)</label>
+                <input type="number" id="onb-height" required value="175">
+
+                <label>Hozirgi vazningiz (kg)</label>
+                <input type="number" id="onb-weight" required value="70">
+
+                <label>Erishmoqchi bo'lgan vazningiz (kg)</label>
+                <input type="number" id="onb-target" required value="65">
+
+                <label>Faollik darajasi</label>
+                <select id="onb-activity">
+                    <option value="kam_harakat">Kam harakat (O'tirib ishlaydigan)</option>
+                    <option value="ortacha_faol">O'rtacha faol (Haftada 3-4 marta mashq)</option>
+                    <option value="juda_faol">Juda faol (Har kuni jismoniy faollik)</option>
+                </select>
+
+                <label>Maqsadingiz</label>
+                <select id="onb-goal">
+                    <option value="kamaytirish">Vazn kamaytirish</option>
+                    <option value="oshirish">Vazn oshirish</option>
+                    <option value="ushlab_turish">Vaznni ushlab turish</option>
+                </select>
+
+                <button type="submit" class="btn" style="margin-top: 15px;">Hisoblash va Boshlash</button>
+            </form>
         </div>
 
-        <div class="calendar-row">
-            <div class="cal-item"><span>Pay</span><br><b>02</b></div>
-            <div class="cal-item"><span>Jum</span><br><b>03</b></div>
-            <div class="cal-item"><span>Shan</span><br><b>04</b></div>
-            <div class="cal-item"><span>Yak</span><br><b>05</b></div>
-            <div class="cal-item active"><span>Dush</span><br><b>06</b></div>
-            <div class="cal-item"><span>Sesh</span><br><b>07</b></div>
-        </div>
+        <div id="view-dashboard" class="view-section active">
+            <div class="header">
+                <div>
+                    <span style="font-size: 12px; color: var(--text-muted);">Xayrli kun! 👋</span>
+                    <h1 id="dash-username">FitUz AI</h1>
+                </div>
+                <button onclick="switchView('settings')" style="background:none; border:none; font-size:24px; cursor:pointer;">⚙️</button>
+            </div>
 
-        <div class="ring-card">
-            <div class="ring-container" id="ring-container">
-                <div class="ring-inner">
-                    <h2 id="consumed-display">0</h2>
-                    <p>/ <span id="limit-display">1610</span> kkal</p>
+            <div class="card" style="text-align: center; background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%); color: white;">
+                <p style="margin: 0; font-size: 13px; opacity: 0.9;">Qolgan kaloriya</p>
+                <h2 id="dash-remaining" style="font-size: 36px; margin: 5px 0;">0</h2>
+                <p style="margin: 0; font-size: 12px; opacity: 0.8;">Kunlik norma: <span id="dash-goal-kcal">2000</span> kkal</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px;">
+                    <div><span style="font-size: 11px; opacity: 0.8;">Oqsil</span><br><b id="dash-protein">0/0g</b></div>
+                    <div><span style="font-size: 11px; opacity: 0.8;">Yog'</span><br><b id="dash-fat">0/0g</b></div>
+                    <div><span style="font-size: 11px; opacity: 0.8;">Uglevod</span><br><b id="dash-carb">0/0g</b></div>
                 </div>
             </div>
-            <p class="ring-subtext" id="status-text">Bugungi ovqatlaringizni qo'shing</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="card" style="padding: 15px; margin-bottom: 0;">
+                    <span style="font-size: 12px; color: var(--text-muted);">💧 Suv ichish</span>
+                    <h3 id="dash-water" style="margin: 5px 0; font-size: 18px;">0 / 2500 ml</h3>
+                    <button class="btn" style="padding: 6px; font-size: 12px; margin-top: 8px;" onclick="addWater(250)">+250 ml</button>
+                </div>
+                <div class="card" style="padding: 15px; margin-bottom: 0; cursor:pointer;" onclick="switchView('history')">
+                    <span style="font-size: 12px; color: var(--text-muted);">⚖️ Joriy vazn</span>
+                    <h3 id="dash-weight" style="margin: 5px 0; font-size: 18px;">0 kg</h3>
+                    <span style="font-size: 11px; color: var(--primary);">Tarixni ko'rish &rarr;</span>
+                </div>
+            </div>
+
+            <h3 style="font-size: 16px; margin-top: 24px; margin-bottom: 12px;">Bugungi yeguliklar</h3>
+            <div id="dash-meals-list">
+                <p style="color: var(--text-muted); font-size: 13px; text-align: center;">Hozircha ovqatlar qo'shilmadi. AI kamera orqali qo'shing!</p>
+            </div>
         </div>
 
-        <div class="macros-grid">
-            <div class="macro-card">
-                <span>🥩 Oqsil</span>
-                <b id="protein-val">0g</b>
+        <div id="view-camera" class="view-section" style="text-align: center;">
+            <h2>📷 AI Ovqat Tahlili</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Ovqatingiz rasmini oling yoki yuklang, Gemini AI uni tahlil qiladi.</p>
+
+            <div class="card" style="border: 2px dashed var(--primary); padding: 30px;">
+                <input type="file" id="cam-file-input" accept="image/*" capture="environment" style="display: none;" onchange="handleImageProcess(event)">
+                <button class="btn" onclick="document.getElementById('cam-file-input').click()">Kamerani ochish / Rasm yuklash</button>
             </div>
-            <div class="macro-card">
-                <span>🌾 Uglevod</span>
-                <b id="carb-val">0g</b>
+
+            <div id="cam-preview-box" style="display:none; margin-top: 20px;">
+                <img id="cam-food-img" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 16px; margin-bottom: 15px;">
+                <div id="cam-loading" style="font-weight: 600; color: var(--primary);">Gemini AI tahlil qilmoqda...</div>
             </div>
-            <div class="macro-card">
-                <span>🥑 Yog'lar</span>
-                <b id="fat-val">0g</b>
+
+            <div id="cam-result-card" class="card" style="display: none; text-align: left; margin-top: 20px;">
+                <h3 id="cam-res-name" style="margin-top:0; color: var(--primary);">Ovqat nomi</h3>
+                <p><b>Kaloriya:</b> <span id="cam-res-cal">0</span> kkal</p>
+                <p><b>Oqsil:</b> <span id="cam-res-pro">0</span>g | <b>Yog':</b> <span id="cam-res-fat">0</span>g | <b>Uglevod:</b> <span id="cam-res-carb">0</span>g</p>
+                <button class="btn" onclick="saveAnalyzedMeal()" style="margin-top: 10px;">Bugungi ovqatimga qo'shish</button>
             </div>
         </div>
 
-        <div class="section-title">Bugungi yeguliklar</div>
-        <div class="food-list" id="food-list-container">
+        <div id="view-history" class="view-section">
+            <h2>📊 Tarix va Statistika</h2>
+            
+            <div class="card">
+                <h3>Kaloriya sarfi grafigi</h3>
+                <div style="height: 180px;"><canvas id="historyChart"></canvas></div>
             </div>
+
+            <h3>O'tgan kunlar</h3>
+            <div id="history-items-list">
+                <p style="color: var(--text-muted); font-size: 13px; text-align: center;">Hozircha tarix mavjud emas.</p>
+            </div>
+        </div>
+
+        <div id="view-settings" class="view-section">
+            <h2>⚙️ Sozlamalar</h2>
+
+            <div class="card">
+                <h3>Shaxsiy ma'lumotlar</h3>
+                <label>Ism</label>
+                <input type="text" id="set-name">
+                <label>Joriy vazn (kg)</label>
+                <input type="number" id="set-weight">
+                <button class="btn" onclick="saveSettings()">Saqlash</button>
+            </div>
+
+            <div class="card">
+                <h3>Tizim ko'rinishi</h3>
+                <button class="btn" onclick="toggleTheme()" style="background: #334155;">Qorong'u / Yorug' rejim</button>
+            </div>
+
+            <div class="card" style="border-color: #ef4444;">
+                <h3 style="color: #ef4444;">Xavfli zona</h3>
+                <button class="btn" onclick="fullReset()" style="background: #ef4444;">Barcha ma'lumotlarni o'chirish</button>
+            </div>
+        </div>
+
     </div>
 
     <div class="bottom-nav">
-        <button class="nav-btn">🏠</button>
-        
-        <div class="camera-btn-wrapper">
-            <label for="camera-input" class="camera-fab">+</label>
-            <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handleCameraCapture(event)">
-        </div>
-
-        <button class="nav-btn">⚙️</button>
+        <button class="nav-item active" onclick="switchView('dashboard')" id="nav-btn-dashboard"><span>🏠</span>Bosh sahifa</button>
+        <button class="nav-item" onclick="switchView('camera')" id="nav-btn-camera"><span>📷</span>AI Kamera</button>
+        <button class="nav-item" onclick="switchView('history')" id="nav-btn-history"><span>📊</span>Tarix</button>
+        <button class="nav-item" onclick="switchView('settings')" id="nav-btn-settings"><span>⚙️</span>Sozlamalar</button>
     </div>
 </div>
 
 <script>
-    // Sahifa ochilganda ma'lumotlarni yuklash va 00:00 da tozalashni tekshirish
-    window.onload = function() {
-        checkMidnightReset();
-        loadData();
+    // --- STORAGE VA DATA BOSHQARUVI ---
+    const AppStorage = {
+        getProfile() { return JSON.parse(localStorage.getItem('fituz_profile')) || null; },
+        saveProfile(p) { localStorage.setItem('fituz_profile', JSON.stringify(p)); },
+        getGoals() { return JSON.parse(localStorage.getItem('fituz_goals')) || null; },
+        saveGoals(g) { localStorage.setItem('fituz_goals', JSON.stringify(g)); },
+        getMeals() { return JSON.parse(localStorage.getItem('fituz_meals')) || []; },
+        saveMeals(m) { localStorage.setItem('fituz_meals', JSON.stringify(m)); },
+        getWater() { return JSON.parse(localStorage.getItem('fituz_water')) || { amount: 0, goal: 2500 }; },
+        saveWater(w) { localStorage.setItem('fituz_water', JSON.stringify(w)); },
+        getHistory() { return JSON.parse(localStorage.getItem('fituz_history')) || []; },
+        saveHistory(h) { localStorage.setItem('fituz_history', JSON.stringify(h)); },
+        getSettings() { return JSON.parse(localStorage.getItem('fituz_settings')) || { theme: 'light' }; },
+        saveSettings(s) { localStorage.setItem('fituz_settings', JSON.stringify(s)); }
     };
 
-    function saveSettings() {
-        let weight = parseFloat(document.getElementById('weight').value);
-        let height = parseFloat(document.getElementById('height').value) * 100;
-        let age = parseFloat(document.getElementById('age').value);
+    function showToast(msg) {
+        let t = document.getElementById('toast-noti');
+        if (!t) {
+            t = document.createElement('div');
+            t.id = 'toast-noti';
+            t.className = 'toast';
+            document.body.appendChild(t);
+        }
+        t.innerText = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
 
-        let bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-        let limit = Math.round(bmr * 1.2 - 350); // Ozish uchun kaloriya
+    // --- NAVIGATION ---
+    function switchView(viewName) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
-        localStorage.setItem('calLimit', limit);
-        localStorage.setItem('weight', weight);
-        localStorage.setItem('height', height);
-        localStorage.setItem('age', age);
+        document.getElementById('view-' + viewName).classList.add('active');
+        const navBtn = document.getElementById('nav-btn-' + viewName);
+        if (navBtn) navBtn.classList.add('active');
+
+        if (viewName === 'dashboard') renderDashboard();
+        if (viewName === 'history') renderHistory();
+    }
+
+    // --- 00:00 KUNNI AVTOMATIK NOLLASH ---
+    function checkMidnightReset() {
+        let lastDate = localStorage.getItem('fituz_last_date');
+        let todayStr = new Date().toDateString();
+
+        if (lastDate && lastDate !== todayStr) {
+            let meals = AppStorage.getMeals();
+            let water = AppStorage.getWater();
+            let history = AppStorage.getHistory();
+
+            history.push({ date: lastDate, meals: meals, water: water.amount });
+            AppStorage.saveHistory(history);
+
+            AppStorage.saveMeals([]);
+            AppStorage.saveWater({ amount: 0, goal: water.goal });
+            showToast("Yangi kun boshlandi! Kaloriya va suv tozalandi.");
+        }
+        localStorage.setItem('fituz_last_date', todayStr);
+    }
+
+    // --- ONBOARDING & CALULATIONS ---
+    document.getElementById('onboarding-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const profile = {
+            name: document.getElementById('onb-name').value,
+            age: parseInt(document.getElementById('onb-age').value),
+            gender: document.getElementById('onb-gender').value,
+            height: parseFloat(document.getElementById('onb-height').value),
+            currentWeight: parseFloat(document.getElementById('onb-weight').value),
+            targetWeight: parseFloat(document.getElementById('onb-target').value),
+            activity: document.getElementById('onb-activity').value,
+            goal: document.getElementById('onb-goal').value
+        };
+        AppStorage.saveProfile(profile);
+
+        // Hisob-kitob (Mifflin-St Jeor)
+        let bmr = (profile.gender === 'Erkak') 
+            ? (10 * profile.currentWeight + 6.25 * profile.height - 5 * profile.age + 5)
+            : (10 * profile.currentWeight + 6.25 * profile.height - 5 * profile.age - 161);
         
-        loadData();
-        alert("Parametrlar saqlandi va kunlik norma yangilandi, dadajon!");
+        let mult = profile.activity === 'kam_harakat' ? 1.2 : (profile.activity === 'ortacha_faol' ? 1.375 : 1.725);
+        let tdee = Math.round(bmr * mult);
+        let calGoal = tdee;
+        if (profile.goal === 'kamaytirish') calGoal -= 500;
+        if (profile.goal === 'oshirish') calGoal += 400;
+
+        AppStorage.saveGoals({
+            calorieGoal: calGoal,
+            proteinGoal: Math.round((calGoal * 0.3) / 4),
+            fatGoal: Math.round((calGoal * 0.25) / 9),
+            carbGoal: Math.round((calGoal * 0.45) / 4)
+        });
+        AppStorage.saveWater({ amount: 0, goal: Math.round(profile.currentWeight * 35) });
+
+        showToast("Rejangiz muvaffaqiyatli tuzildi!");
+        switchView('dashboard');
+    });
+
+    // --- DASHBOARD RENDER ---
+    function renderDashboard() {
+        const profile = AppStorage.getProfile();
+        if (!profile) {
+            switchView('onboarding');
+            return;
+        }
+        document.getElementById('dash-username').innerText = profile.name;
+        document.getElementById('dash-weight').innerText = profile.currentWeight + ' kg';
+
+        const goals = AppStorage.getGoals();
+        const meals = AppStorage.getMeals();
+        const water = AppStorage.getWater();
+
+        let consumed = meals.reduce((s, m) => s + m.calories, 0);
+        let pro = meals.reduce((s, m) => s + m.protein, 0);
+        let fat = meals.reduce((s, m) => s + m.fat, 0);
+        let carb = meals.reduce((s, m) => s + m.carbs, 0);
+
+        let goalKcal = goals ? goals.calorieGoal : 2000;
+        document.getElementById('dash-goal-kcal').innerText = goalKcal;
+        document.getElementById('dash-remaining').innerText = goalKcal - consumed;
+
+        document.getElementById('dash-protein').innerText = `${pro}/${goals ? goals.proteinGoal : 100}g`;
+        document.getElementById('dash-fat').innerText = `${fat}/${goals ? goals.fatGoal : 70}g`;
+        document.getElementById('dash-carb').innerText = `${carb}/${goals ? goals.carbGoal : 200}g`;
+        document.getElementById('dash-water').innerText = `${water.amount} / ${water.goal} ml`;
+
+        const listEl = document.getElementById('dash-meals-list');
+        if (meals.length > 0) {
+            listEl.innerHTML = meals.map((m, idx) => `
+                <div class="card" style="padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div>
+                        <b>${m.food}</b><br>
+                        <span style="font-size: 11px; color: var(--text-muted);">${m.calories} kkal • Oqsil: ${m.protein}g • Yog': ${m.fat}g</span>
+                    </div>
+                    <button onclick="removeMeal(${idx})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:16px;">🗑️</button>
+                </div>
+            `).join('');
+        } else {
+            listEl.innerHTML = `<p style="color: var(--text-muted); font-size: 13px; text-align: center;">Hozircha ovqatlar qo'shilmadi. AI kamera orqali qo'shing!</p>`;
+        }
     }
 
-    function handleCameraCapture(event) {
+    function addWater(amount) {
+        let w = AppStorage.getWater();
+        w.amount += amount;
+        AppStorage.saveWater(w);
+        document.getElementById('dash-water').innerText = `${w.amount} / ${w.goal} ml`;
+        showToast(`+${amount} ml suv qo'shildi! 💧`);
+    }
+
+    function removeMeal(index) {
+        let meals = AppStorage.getMeals();
+        meals.splice(index, 1);
+        AppStorage.saveMeals(meals);
+        renderDashboard();
+    }
+
+    // --- AI CAMERA SIMULATOR ---
+    let detectedFoodItem = null;
+    function handleImageProcess(event) {
         const file = event.target.files[0];
-        if (file) {
-            const imageUrl = URL.createObjectURL(file);
-            
-            // Tasodifiy haqiqiyroq taom qiymatlarini simulyatsiya qilamiz
-            const foods = [
-                { name: "Tovuq go'shti va salat", kcal: 280, protein: 25, carb: 10, fat: 8 },
-                { name: "Grechka va kotlet", kcal: 350, protein: 18, carb: 40, fat: 12 },
-                { name: "Tvorog va mevalar", kcal: 210, protein: 22, carb: 15, fat: 4 }
-            ];
-            const randomFood = foods[Math.floor(Math.random() * foods.length)];
+        if (!file) return;
 
-            // Ma'lumotlarni xotiraga qo'shish
-            let history = JSON.parse(localStorage.getItem('foodHistory')) || [];
-            let newEntry = {
-                img: imageUrl,
-                name: randomFood.name,
-                kcal: randomFood.kcal,
-                protein: randomFood.protein,
-                carb: randomFood.carb,
-                fat: randomFood.fat
-            };
-            history.unshift(newEntry);
-            localStorage.setItem('foodHistory', JSON.stringify(history));
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('cam-preview-box').style.display = 'block';
+            document.getElementById('cam-food-img').src = e.target.result;
+            document.getElementById('cam-result-card').style.display = 'none';
+            document.getElementById('cam-loading').style.display = 'block';
 
-            // Jami iste'mol qilingan kaloriyani qo'shish
-            let consumed = parseInt(localStorage.getItem('consumedKcal')) || 0;
-            consumed += randomFood.kcal;
-            localStorage.setItem('consumedKcal', consumed);
+            // Gemini Vision AI Simulyatsiyasi
+            setTimeout(() => {
+                const samples = [
+                    { food: "Osh (Palov)", calories: 650, protein: 22, fat: 20, carbs: 85 },
+                    { food: "Shashlik (Go'sht)", calories: 420, protein: 38, fat: 26, carbs: 5 },
+                    { food: "Tovuqli sabzavot salati", calories: 240, protein: 25, fat: 8, carbs: 12 },
+                    { food: "Non va pishloq", calories: 280, protein: 12, fat: 10, carbs: 32 }
+                ];
+                detectedFoodItem = samples[Math.floor(Math.random() * samples.length)];
 
-            loadData();
-        }
+                document.getElementById('cam-loading').style.display = 'none';
+                document.getElementById('cam-res-name').innerText = detectedFoodItem.food;
+                document.getElementById('cam-res-cal').innerText = detectedFoodItem.calories;
+                document.getElementById('cam-res-pro').innerText = detectedFoodItem.protein;
+                document.getElementById('cam-res-fat').innerText = detectedFoodItem.fat;
+                document.getElementById('cam-res-carb').innerText = detectedFoodItem.carbs;
+                document.getElementById('cam-result-card').style.display = 'block';
+            }, 1500);
+        };
+        reader.readAsDataURL(file);
     }
 
-    function loadData() {
-        let limit = parseInt(localStorage.getItem('calLimit')) || 1610;
-        let consumed = parseInt(localStorage.getItem('consumedKcal')) || 0;
-        let history = JSON.parse(localStorage.getItem('foodHistory')) || [];
+    function saveAnalyzedMeal() {
+        if (!detectedFoodItem) return;
+        let meals = AppStorage.getMeals();
+        meals.push(detectedFoodItem);
+        AppStorage.saveMeals(meals);
+        showToast("Ovqat bugungi kunga qo'shildi!");
+        switchView('dashboard');
+    }
 
-        document.getElementById('limit-display').innerText = limit;
-        document.getElementById('consumed-display').innerText = consumed;
+    // --- HISTORY CHART ---
+    let myChartInstance = null;
+    function renderHistory() {
+        const history = AppStorage.getHistory();
+        const listEl = document.getElementById('history-items-list');
 
-        // Doirani foiz bo'yicha to'ldirish
-        let percentage = (consumed / limit) * 360;
-        if(percentage > 360) percentage = 360;
-        document.getElementById('ring-container').style.setProperty('--progress-deg', percentage + 'deg');
-
-        // Makrolarni hisoblash
-        let totalProtein = history.reduce((sum, item) => sum + item.protein, 0);
-        let totalCarb = history.reduce((sum, item) => sum + item.carb, 0);
-        let totalFat = history.reduce((sum, item) => sum + item.fat, 0);
-
-        document.getElementById('protein-val').innerText = totalProtein + 'g';
-        document.getElementById('carb-val').innerText = totalCarb + 'g';
-        document.getElementById('fat-val').innerText = totalFat + 'g';
-
-        // Qolgan kaloriya xabari
-        let diff = limit - consumed;
-        if(diff >= 0) {
-            document.getElementById('status-text').innerText = `Yaxshi yo'ldasiz! Qolgan ${diff} kkal`;
-        } else {
-            document.getElementById('status-text').innerText = `Bugungi limitdan ${Math.abs(diff)} kkal oshib ketdingiz!`;
-        }
-
-        // Ro'yxatni chiqarish
-        let listContainer = document.getElementById('food-list-container');
-        if(history.length === 0) {
-            listContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:12px;">Hozircha ovqatlar qo'shilmadi. Kameradan rasmga oling!</p>`;
-        } else {
-            let html = '';
-            history.forEach(item => {
-                html += `
-                    <div class="food-item">
-                        <img src="${item.img}" alt="Ovqat">
-                        <div class="food-info">
-                            <h4>${item.name}</h4>
-                            <p>${item.kcal} kkal • ${item.protein}g protein • ${item.fat}g yog'</p>
-                        </div>
+        if (history.length > 0) {
+            listEl.innerHTML = history.map(h => {
+                let totalKcal = h.meals.reduce((sum, m) => sum + m.calories, 0);
+                return `
+                    <div class="card" style="padding: 12px; margin-bottom: 8px;">
+                        <b>📅 ${h.date}</b><br>
+                        <span style="font-size: 12px; color: var(--text-muted);">Jami: ${totalKcal} kkal • Suv: ${h.water} ml</span>
                     </div>
                 `;
-            });
-            listContainer.innerHTML = html;
+            }).join('');
+        }
+
+        const ctx = document.getElementById('historyChart').getContext('2d');
+        if (myChartInstance) myChartInstance.destroy();
+
+        myChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: history.map(h => h.date),
+                datasets: [{
+                    label: 'Kaloriya (kkal)',
+                    data: history.map(h => h.meals.reduce((sum, m) => sum + m.calories, 0)),
+                    borderColor: '#22C55E',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    // --- SETTINGS ---
+    function saveSettings() {
+        let p = AppStorage.getProfile();
+        p.name = document.getElementById('set-name').value;
+        p.currentWeight = parseFloat(document.getElementById('set-weight').value);
+        AppStorage.saveProfile(p);
+        showToast("Sozlamalar saqlandi!");
+    }
+
+    function toggleTheme() {
+        let s = AppStorage.getSettings();
+        s.theme = s.theme === 'light' ? 'dark' : 'light';
+        AppStorage.saveSettings(s);
+        document.documentElement.setAttribute('data-theme', s.theme);
+        showToast("Rejim o'zgardi!");
+    }
+
+    function fullReset() {
+        if (confirm("Barcha ma'lumotlarni o'chirishni xohlaysizmi?")) {
+            localStorage.clear();
+            location.reload();
         }
     }
 
-    // 00:00 dan keyin ma'lumotlarni avtomatik nollash (restart)
-    function checkMidnightReset() {
-        let lastDate = localStorage.getItem('lastDate');
-        let currentDate = new Date().toLocaleDateString();
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        checkMidnightReset();
+        const settings = AppStorage.getSettings();
+        if (settings.theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
 
-        if (lastDate !== currentDate) {
-            localStorage.setItem('consumedKcal', 0);
-            localStorage.setItem('foodHistory', JSON.stringify([]));
-            localStorage.setItem('lastDate', currentDate);
+        const profile = AppStorage.getProfile();
+        if (!profile) {
+            switchView('onboarding');
+        } else {
+            document.getElementById('set-name').value = profile.name;
+            document.getElementById('set-weight').value = profile.currentWeight;
+            switchView('dashboard');
         }
-    }
+    });
 </script>
-
 </body>
 </html>
+
