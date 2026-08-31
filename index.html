@@ -9,26 +9,28 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   :root{
-    --primary:#2F9E5C;
-    --primary-dark:#227C46;
-    --primary-soft:#E7F6ED;
-    --accent:#F5A524;
-    --bg-color:#FAFAF7;
+    --primary:#1D4ED8;
+    --primary-dark:#0F172A;
+    --primary-soft:#EFF4FF;
+    --accent:#1D4ED8;
+    --bg-color:#FFFFFF;
     --card-bg:#FFFFFF;
-    --text-main:#16211B;
-    --text-muted:#6B7A70;
-    --border-color:#E7E9E4;
+    --text-main:#0A0A0A;
+    --text-muted:#5B6472;
+    --border-color:#E4E7EC;
     --danger:#E14A4A;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   [data-theme="dark"]{
-    --bg-color:#0E1512;
-    --card-bg:#161F1A;
-    --text-main:#F4F7F4;
-    --text-muted:#8FA096;
-    --border-color:#243029;
-    --primary-soft:#193322;
+    --bg-color:#0A0A0A;
+    --card-bg:#151517;
+    --text-main:#FAFAFA;
+    --text-muted:#9CA3AF;
+    --border-color:#26272B;
+    --primary-soft:#0F1E3D;
+    --primary:#3B82F6;
+    --primary-dark:#1D4ED8;
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
@@ -56,7 +58,7 @@
       min-height:0;
       border-radius:32px;
       overflow:hidden;
-      border:8px solid #1c2620;
+      border:8px solid #0A0A0A;
       box-shadow:0 30px 60px -20px rgba(0,0,0,.35);
     }
   }
@@ -257,6 +259,7 @@
 
       <div id="cam-result-card" class="card" style="display:none;text-align:left;margin-top:18px;">
         <h3 class="result-name" id="cam-res-name">Ovqat nomi</h3>
+        <div class="result-row"><span>Porsiya og'irligi</span><b id="cam-res-grams">0 g</b></div>
         <div class="result-row"><span>Kaloriya</span><b id="cam-res-cal">0 kkal</b></div>
         <div class="result-row"><span>Oqsil</span><b id="cam-res-pro">0 g</b></div>
         <div class="result-row"><span>Yog'</span><b id="cam-res-fat">0 g</b></div>
@@ -544,30 +547,50 @@ async function analyzeFoodImage(base64Data, mediaType) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 1000,
+      max_tokens: 1200,
       messages: [{
         role: 'user',
         content: [
           { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64Data } },
           {
             type: 'text',
-            text: "Rasmdagi taom(lar)ni tahlil qil. Faqat quyidagi JSON obyekti bilan javob ber, boshqa hech qanday matn, izoh yoki markdown belgisi qo'shma:\n" +
-              '{"food": "Taomning aniq nomi, o\'zbek tilida", "calories": son, "protein": son, "fat": son, "carbs": son}\n' +
-              "Barcha son qiymatlar rasmdagi portsiya uchun realistik taxminiy grammlarda/kaloriyalarda bo'lsin (protein/fat/carbs — gramm, calories — kkal, faqat butun sonlar). Agar rasmda bir nechta taom bo'lsa, hammasini birgalikda bitta ovqat sifatida hisobla va nomida asosiy komponentlarni ko'rsat. Agar rasmda ovqat umuman ko'rinmasa, {\"food\": \"Aniqlanmadi\", \"calories\": 0, \"protein\": 0, \"fat\": 0, \"carbs\": 0} qaytar."
+            text:
+              "Sen tajribali ovqatlanish mutaxassisisan. Rasmdagi taom(lar)ni diqqat bilan tekshir: taomning turini, asosiy tarkibiy qismlarini (masalan guruch, go'sht, yog', sabzavot), plastinka/idish o'lchamini va ko'rinishidagi porsiya hajmini baholab, real vaznini (grammda) va oziqaviy qiymatini hisobla.\n\n" +
+              "Javobni FAQAT quyidagi JSON obyekti ko'rinishida ber — hech qanday qo'shimcha matn, tushuntirish, fikr yoki markdown belgisi (masalan ```) bo'lmasin, faqat bitta yagona JSON obyekt:\n" +
+              '{"food": "Taomning aniq va tabiiy nomi, o\'zbek tilida", "grams": son, "calories": son, "protein": son, "fat": son, "carbs": son}\n\n' +
+              "Qoidalar:\n" +
+              "- \"grams\" — rasmda ko'rinayotgan porsiyaning taxminiy umumiy og'irligi (gramm).\n" +
+              "- \"calories\" — shu porsiya uchun umumiy kaloriya (kkal), butun son.\n" +
+              "- \"protein\", \"fat\", \"carbs\" — shu porsiya uchun gramm, butun sonlar.\n" +
+              "- Agar rasmda bir nechta taom yoki idish bo'lsa, hammasini birlashtirib bitta umumiy ovqat sifatida hisobla va nomida asosiy komponentlarni sanab o't (masalan \"Osh, salat va non\").\n" +
+              "- Rasm noaniq bo'lsa ham, ko'ringan eng yaqin taom turi bo'yicha eng yaxshi taxminingni ber — \"Aniqlanmadi\" javobini faqat rasmda umuman ovqat yo'q bo'lsa ishlat.\n" +
+              "- Sonlarni tirnoqsiz, faqat raqam sifatida yoz (masalan 450, \"450\" emas)."
           }
         ]
       }]
     })
   });
 
-  if (!response.ok) throw new Error('API error: ' + response.status);
+  if (!response.ok) {
+    const errText = await response.text().catch(() => '');
+    throw new Error('API error ' + response.status + ': ' + errText);
+  }
+
   const data = await response.json();
   const text = (data.content || []).map(b => b.text || '').join('');
-  const clean = text.replace(/```json|```/g, '').trim();
-  const parsed = JSON.parse(clean);
+
+  // The model should return only JSON, but be defensive: pull out the
+  // first {...} block in case any stray text or code fences slip in.
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('JSON topilmadi: ' + text.slice(0, 200));
+  const parsed = JSON.parse(match[0]);
+
+  const food = String(parsed.food || '').trim();
+  if (!food) throw new Error('Taom nomi bo\'sh qaytdi');
 
   return {
-    food: String(parsed.food || 'Noma\'lum taom'),
+    food,
+    grams: Math.max(0, Math.round(Number(parsed.grams) || 0)),
     calories: Math.max(0, Math.round(Number(parsed.calories) || 0)),
     protein: Math.max(0, Math.round(Number(parsed.protein) || 0)),
     fat: Math.max(0, Math.round(Number(parsed.fat) || 0)),
@@ -644,8 +667,8 @@ function renderHistory() {
       datasets: [{
         label: 'Kaloriya (kkal)',
         data: history.map(h => h.meals.reduce((sum, m) => sum + m.calories, 0)),
-        borderColor: '#2F9E5C',
-        backgroundColor: 'rgba(47, 158, 92, 0.12)',
+        borderColor: '#1D4ED8',
+        backgroundColor: 'rgba(29, 78, 216, 0.12)',
         fill: true,
         tension: 0.3
       }]
