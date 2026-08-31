@@ -312,23 +312,58 @@
 </div>
 
 <script>
-// ---------- PERSISTENT STORAGE (cross-session, per user) ----------
+// ---------- STORAGE (never blocks the UI) ----------
+// window.storage calls go to a sandboxed host; if that bridge is slow,
+// missing, or a key doesn't exist yet, we must never let the UI hang.
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((resolve) => setTimeout(() => resolve(undefined), ms))
+  ]);
+}
 const Store = {
   async get(key, fallback) {
     try {
-      const r = await window.storage.get(key, false);
+      if (!window.storage) return fallback;
+      const r = await withTimeout(window.storage.get(key, false), 3000);
       return r && r.value !== undefined ? JSON.parse(r.value) : fallback;
     } catch (e) { return fallback; }
   },
-  async set(key, value) {
-    try { await window.storage.set(key, JSON.stringify(value), false); }
-    catch (e) { console.error('Storage error:', e); }
+  // Fire-and-forget: never awaited by UI code, so a slow/broken bridge
+  // can never freeze navigation or interaction.
+  setBackground(key, value) {
+    try {
+      if (!window.storage) return;
+      withTimeout(window.storage.set(key, JSON.stringify(value), false), 4000).catch(() => {});
+    } catch (e) { /* ignore */ }
+  },
+  deleteBackground(key) {
+    try {
+      if (!window.storage) return;
+      withTimeout(window.storage.delete(key, false), 4000).catch(() => {});
+    } catch (e) { /* ignore */ }
   }
 };
 const K = {
   profile:'fituz_profile', goals:'fituz_goals', meals:'fituz_meals',
   water:'fituz_water', history:'fituz_history', settings:'fituz_settings', lastDate:'fituz_last_date'
 };
+
+// ---------- IN-MEMORY STATE ----------
+// The UI always reads/writes this object synchronously, so every action
+// (submit, add water, save meal...) is instant. Persistence to storage
+// happens quietly in the background afterwards.
+const State = {
+  profile: null,
+  goals: null,
+  meals: [],
+  water: { amount: 0, goal: 2500 },
+  history: [],
+  settings: { theme: 'light' },
+  lastDate: null
+};
+
+function persist(key) { Store.setBackground(K[key], State[key]); }
 
 function showToast(msg) {
   let t = document.getElementById('toast-noti');
@@ -352,70 +387,68 @@ function switchView(viewName) {
 }
 
 // ---------- MIDNIGHT RESET ----------
-async function checkMidnightReset() {
-  const lastDate = await Store.get(K.lastDate, null);
+function checkMidnightReset() {
   const todayStr = new Date().toDateString();
-  if (lastDate && lastDate !== todayStr) {
-    const meals = await Store.get(K.meals, []);
-    const water = await Store.get(K.water, { amount: 0, goal: 2500 });
-    const history = await Store.get(K.history, []);
-    history.push({ date: lastDate, meals, water: water.amount });
-    await Store.set(K.history, history);
-    await Store.set(K.meals, []);
-    await Store.set(K.water, { amount: 0, goal: water.goal });
+  if (State.lastDate && State.lastDate !== todayStr) {
+    State.history.push({ date: State.lastDate, meals: State.meals, water: State.water.amount });
+    State.meals = [];
+    State.water = { amount: 0, goal: State.water.goal };
+    persist('history'); persist('meals'); persist('water');
     showToast('Yangi kun boshlandi! Kaloriya va suv tozalandi.');
   }
-  await Store.set(K.lastDate, todayStr);
+  State.lastDate = todayStr;
+  persist('lastDate');
 }
 
 // ---------- ONBOARDING & CALCULATIONS ----------
-document.getElementById('onboarding-form').addEventListener('submit', async (e) => {
+document.getElementById('onboarding-form').addEventListener('submit', (e) => {
   e.preventDefault();
   const profile = {
     name: document.getElementById('onb-name').value,
-    age: parseInt(document.getElementById('onb-age').value),
+    age: parseInt(document.getElementById('onb-age').value) || 0,
     gender: document.getElementById('onb-gender').value,
-    height: parseFloat(document.getElementById('onb-height').value),
-    currentWeight: parseFloat(document.getElementById('onb-weight').value),
-    targetWeight: parseFloat(document.getElementById('onb-target').value),
+    height: parseFloat(document.getElementById('onb-height').value) || 0,
+    currentWeight: parseFloat(document.getElementById('onb-weight').value) || 0,
+    targetWeight: parseFloat(document.getElementById('onb-target').value) || 0,
     activity: document.getElementById('onb-activity').value,
     goal: document.getElementById('onb-goal').value
   };
-  await Store.set(K.profile, profile);
 
   let bmr = (profile.gender === 'Erkak')
     ? (10 * profile.currentWeight + 6.25 * profile.height - 5 * profile.age + 5)
     : (10 * profile.currentWeight + 6.25 * profile.height - 5 * profile.age - 161);
 
   const mult = profile.activity === 'kam_harakat' ? 1.2 : (profile.activity === 'ortacha_faol' ? 1.375 : 1.725);
-  let tdee = Math.round(bmr * mult);
-  let calGoal = tdee;
+  let calGoal = Math.round(bmr * mult);
   if (profile.goal === 'kamaytirish') calGoal -= 500;
   if (profile.goal === 'oshirish') calGoal += 400;
 
-  await Store.set(K.goals, {
+  State.profile = profile;
+  State.goals = {
     calorieGoal: calGoal,
     proteinGoal: Math.round((calGoal * 0.3) / 4),
     fatGoal: Math.round((calGoal * 0.25) / 9),
     carbGoal: Math.round((calGoal * 0.45) / 4)
-  });
-  await Store.set(K.water, { amount: 0, goal: Math.round(profile.currentWeight * 35) });
+  };
+  State.water = { amount: 0, goal: Math.round(profile.currentWeight * 35) || 2500 };
+  State.meals = [];
+
+  persist('profile'); persist('goals'); persist('water'); persist('meals');
 
   showToast('Rejangiz muvaffaqiyatli tuzildi!');
   switchView('dashboard');
 });
 
 // ---------- DASHBOARD ----------
-async function renderDashboard() {
-  const profile = await Store.get(K.profile, null);
-  if (!profile) { switchView('onboarding'); return; }
+function renderDashboard() {
+  if (!State.profile) { switchView('onboarding'); return; }
 
-  document.getElementById('dash-username').innerText = profile.name || 'FitUz AI';
-  document.getElementById('dash-weight').innerText = profile.currentWeight + ' kg';
+  document.getElementById('dash-username').innerText = State.profile.name || 'FitUz AI';
+  document.getElementById('dash-weight').innerText = State.profile.currentWeight + ' kg';
 
-  const goals = await Store.get(K.goals, null);
-  const meals = await Store.get(K.meals, []);
-  const water = await Store.get(K.water, { amount: 0, goal: 2500 });
+  const goals = State.goals;
+  const meals = State.meals;
+  const water = State.water;
 
   const consumed = meals.reduce((s, m) => s + m.calories, 0);
   const pro = meals.reduce((s, m) => s + m.protein, 0);
@@ -452,18 +485,16 @@ function escapeHtml(str) {
   return d.innerHTML;
 }
 
-async function addWater(amount) {
-  const w = await Store.get(K.water, { amount: 0, goal: 2500 });
-  w.amount += amount;
-  await Store.set(K.water, w);
-  document.getElementById('dash-water').innerText = `${w.amount} / ${w.goal} ml`;
+function addWater(amount) {
+  State.water.amount += amount;
+  persist('water');
+  document.getElementById('dash-water').innerText = `${State.water.amount} / ${State.water.goal} ml`;
   showToast(`+${amount} ml suv qo'shildi! 💧`);
 }
 
-async function removeMeal(index) {
-  const meals = await Store.get(K.meals, []);
-  meals.splice(index, 1);
-  await Store.set(K.meals, meals);
+function removeMeal(index) {
+  State.meals.splice(index, 1);
+  persist('meals');
   renderDashboard();
 }
 
@@ -546,7 +577,7 @@ async function analyzeFoodImage(base64Data, mediaType) {
 
 function editAnalyzedMeal() {
   if (!detectedFoodItem) return;
-  const name = prompt("Taom nomi:", detectedFoodItem.food);
+  const name = prompt('Taom nomi:', detectedFoodItem.food);
   if (name === null) return;
   const cal = prompt('Kaloriya (kkal):', detectedFoodItem.calories);
   if (cal === null) return;
@@ -571,11 +602,10 @@ function editAnalyzedMeal() {
   document.getElementById('cam-res-carb').innerText = detectedFoodItem.carbs + ' g';
 }
 
-async function saveAnalyzedMeal() {
+function saveAnalyzedMeal() {
   if (!detectedFoodItem) return;
-  const meals = await Store.get(K.meals, []);
-  meals.push(detectedFoodItem);
-  await Store.set(K.meals, meals);
+  State.meals.push(detectedFoodItem);
+  persist('meals');
   showToast("Ovqat bugungi kunga qo'shildi!");
   detectedFoodItem = null;
   document.getElementById('cam-preview-box').style.display = 'none';
@@ -586,8 +616,8 @@ async function saveAnalyzedMeal() {
 
 // ---------- HISTORY ----------
 let myChartInstance = null;
-async function renderHistory() {
-  const history = await Store.get(K.history, []);
+function renderHistory() {
+  const history = State.history;
   const listEl = document.getElementById('history-items-list');
 
   if (history.length > 0) {
@@ -625,46 +655,59 @@ async function renderHistory() {
 }
 
 // ---------- SETTINGS ----------
-async function saveSettings() {
-  const p = await Store.get(K.profile, {});
-  p.name = document.getElementById('set-name').value;
-  p.currentWeight = parseFloat(document.getElementById('set-weight').value);
-  await Store.set(K.profile, p);
+function saveSettings() {
+  if (!State.profile) State.profile = {};
+  State.profile.name = document.getElementById('set-name').value;
+  State.profile.currentWeight = parseFloat(document.getElementById('set-weight').value) || 0;
+  persist('profile');
   showToast('Sozlamalar saqlandi!');
   renderDashboard();
 }
 
-async function toggleTheme() {
-  const s = await Store.get(K.settings, { theme: 'light' });
-  s.theme = s.theme === 'light' ? 'dark' : 'light';
-  await Store.set(K.settings, s);
-  document.documentElement.setAttribute('data-theme', s.theme);
+function toggleTheme() {
+  State.settings.theme = State.settings.theme === 'light' ? 'dark' : 'light';
+  persist('settings');
+  document.documentElement.setAttribute('data-theme', State.settings.theme);
   showToast("Rejim o'zgardi!");
 }
 
-async function fullReset() {
+function fullReset() {
   if (!confirm("Barcha ma'lumotlarni o'chirishni xohlaysizmi?")) return;
-  for (const key of Object.values(K)) {
-    try { await window.storage.delete(key, false); } catch (e) {}
-  }
+  Object.values(K).forEach(key => Store.deleteBackground(key));
   location.reload();
 }
 
 // ---------- INIT ----------
-document.addEventListener('DOMContentLoaded', async () => {
-  await checkMidnightReset();
-  const settings = await Store.get(K.settings, { theme: 'light' });
-  if (settings.theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+async function init() {
+  // Load everything from storage with a hard timeout each, so a slow or
+  // missing storage bridge can never keep the app stuck on a blank screen.
+  const [profile, goals, meals, water, history, settings, lastDate] = await Promise.all([
+    Store.get(K.profile, null),
+    Store.get(K.goals, null),
+    Store.get(K.meals, []),
+    Store.get(K.water, { amount: 0, goal: 2500 }),
+    Store.get(K.history, []),
+    Store.get(K.settings, { theme: 'light' }),
+    Store.get(K.lastDate, null)
+  ]);
+  State.profile = profile; State.goals = goals; State.meals = meals;
+  State.water = water; State.history = history; State.settings = settings; State.lastDate = lastDate;
 
-  const profile = await Store.get(K.profile, null);
-  if (!profile) {
+  checkMidnightReset();
+
+  if (State.settings.theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+
+  if (!State.profile) {
     switchView('onboarding');
   } else {
-    document.getElementById('set-name').value = profile.name || '';
-    document.getElementById('set-weight').value = profile.currentWeight || '';
+    document.getElementById('set-name').value = State.profile.name || '';
+    document.getElementById('set-weight').value = State.profile.currentWeight || '';
     switchView('dashboard');
   }
-});
+}
+
+document.addEventListener('DOMContentLoaded', init);
 </script>
+
 </body>
 </html>
